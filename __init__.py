@@ -25,4 +25,4 @@ def getMetaData():
 #
 #   \param app The application that the plug-in needs to register with.
 def register(app):
-    return {"tool": StatusWatcher.StatusWatcher()}
+    return {"extension": StatusWatcher.StatusWatcher(app)}

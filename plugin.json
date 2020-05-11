@@ -2,7 +2,7 @@
     "name": "Status Watcher",
     "author": "John Reese",
     "version": "1.0",
-    "api": "7.0",
     "description": "Watch and log status of the print job",
-    "catalog": "uranium"
+    "api": "7.2.0",
+    "i18n-catalog": "cura"
 }

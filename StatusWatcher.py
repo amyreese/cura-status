@@ -1,30 +1,32 @@
 import sys
 
-from UM.Application import Application #To register the information dialogue.
+from UM.Application import Application
 from UM.Event import Event #To understand what events to react to.
 from UM.Logger import Logger
 from UM.PluginRegistry import PluginRegistry #To find the QML files in the plug-in folder.
 from UM.Scene.Selection import Selection #To get the current selection and some information about it.
-from UM.Tool import Tool #The PluginObject we're going to extend.
+from UM.Extension import Extension
 
-class StatusWatcher(Tool): #The Tool class extends from PluginObject, and we have to be a PluginObject for the plug-in to load.
-    ##  Creates an instance of this tool.
-    #
-    #   Here you can set some additional metadata.
-    def __init__(self):
+from cura.CuraApplication import CuraApplication
+from cura.UI.PrintInformation import PrintInformation
+from PyQt5.QtCore import QTimer
+
+class StatusWatcher(Extension):
+    def __init__(self, application: CuraApplication):
         super().__init__()
 
-        self._shortcut_key = None
+        self._app = application
 
-        #This plug-in creates a window with information about the objects we've selected. That window is lazily-loaded.
-        self.info_window = None
+        Logger.log("i", "Python version: %s" % (sys.version_info, ))
+        Logger.log("i", "Cura app: %s" % (self._app, ))
 
-        Logger.log("i", "Python version %s" % (sys.version_info(), ))
+        self._timer = QTimer()
+        self._timer.timeout.connect(self.dump_status)
+        self._timer.start(1000)
 
-    ##  Called when something happens in the scene while our tool is active.
-    #
-    #   For instance, we can react to mouse clicks, mouse movements, and so on.
-    def event(self, event):
-        super().event(event)
-
-        Logger.log("i", "event received: %s" % (event, ))
+    def dump_status(self):
+        pi = self._app.getPrintInformation()
+        if pi is not None:
+            dur = pi.currentPrintTime
+            if dur.valid:
+                Logger.log("i", "print time: %s" % (dur.getDisplayString(), ))
