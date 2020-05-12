@@ -89,7 +89,7 @@ class StatusWatcher(Extension):
 
             devices = self._app.getMachineManager().printerOutputDevices
             if devices:
-                printer = printers[0].activePrinter
+                printer = devices[0].activePrinter
                 if printer is not None:
                     job = printer.activePrintJob
                     if job is not None:
