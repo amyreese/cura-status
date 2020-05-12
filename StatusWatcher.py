@@ -12,7 +12,10 @@ from cura.CuraApplication import CuraApplication
 from PyQt5.QtCore import QTimer
 
 
-def duration_text(duration: Union[Duration, int]) -> str:
+def duration_text(duration: Union[Duration, int, float]) -> str:
+    if isinstance(duration, float):
+        duration = round(duration)
+
     if isinstance(duration, int):
         days, hours, minutes, = 0, 0, 0
         seconds = duration
@@ -38,10 +41,11 @@ def duration_text(duration: Union[Duration, int]) -> str:
         )
 
     else:
-        return "x"
+        Logger.warning("unknown type of duration: %s (%s)", type(duration), duration)
+        return ""
 
     if days <= 0 and hours <= 0 and minutes <= 0 and seconds <= 0:
-        return "<0"
+        return ""
 
     if days > 0:
         tpl = "{days}:{hours:02}:{minutes:02}:{seconds:02}"
@@ -93,14 +97,6 @@ class StatusWatcher(Extension):
                 Elapsed: {elapsed_time}
                 Remaining: {remaining_time}
             """
-            Logger.log(
-                "i",
-                tpl,
-                job_name=job_name,
-                total_time=total_time,
-                elapsed_time=elapsed_time,
-                remaining_time=remaining_time,
-            )
             content = tpl.format(
                 job_name=job_name,
                 total_time=duration_text(total_time),
