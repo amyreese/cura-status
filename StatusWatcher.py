@@ -85,8 +85,9 @@ class StatusWatcher(Extension):
                 if printer is not None:
                     job = printer.activePrintJob
                     if job is not None:
+                        total_time = duration_text(job.timeTotal)
                         elapsed_time = duration_text(job.timeElapsed)
-                        remaining_time = duration_text(job.timeRemaining)
+                        remaining_time = duration_text(job.timeTotal - job.timeElapsed)
 
             content = """
                 Job Name: {job_name}
