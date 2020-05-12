@@ -38,10 +38,10 @@ def duration_text(duration: Union[Duration, int]) -> str:
         )
 
     else:
-        return ""
+        return "x"
 
     if days <= 0 and hours <= 0 and minutes <= 0 and seconds <= 0:
-        return ""
+        return "<0"
 
     if days > 0:
         tpl = "{days}:{hours:02}:{minutes:02}:{seconds:02}"
@@ -49,8 +49,6 @@ def duration_text(duration: Union[Duration, int]) -> str:
         tpl = "{hours}:{minutes:02}:{seconds:02}"
 
     return tpl.format(days=days, hours=hours, minutes=minutes, seconds=seconds,)
-
-    return ""
 
 
 class StatusWatcher(Extension):
@@ -70,14 +68,14 @@ class StatusWatcher(Extension):
     def dump_status(self):
         try:
             job_name = ""
-            total_time = ""
-            elapsed_time = ""
-            remaining_time = ""
+            total_time = -1337
+            elapsed_time = -1337
+            remaining_time = -1337
 
             info = self._app.getPrintInformation()
             if info is not None:
                 job_name = info.jobName
-                total_time = duration_text(info.currentPrintTime)
+                total_time = info.currentPrintTime
 
             devices = self._app.getMachineManager().printerOutputDevices
             if devices:
@@ -85,20 +83,29 @@ class StatusWatcher(Extension):
                 if printer is not None:
                     job = printer.activePrintJob
                     if job is not None:
-                        total_time = duration_text(job.timeTotal)
-                        elapsed_time = duration_text(job.timeElapsed)
-                        remaining_time = duration_text(job.timeTotal - job.timeElapsed)
+                        total_time = job.timeTotal
+                        elapsed_time = job.timeElapsed
+                        remaining_time = job.timeTotal - job.timeElapsed
 
-            content = """
+            tpl = """
                 Job Name: {job_name}
                 Total Time: {total_time}
                 Elapsed: {elapsed_time}
                 Remaining: {remaining_time}
-            """.format(
+            """
+            Logger.log(
+                "i",
+                tpl,
                 job_name=job_name,
                 total_time=total_time,
                 elapsed_time=elapsed_time,
                 remaining_time=remaining_time,
+            )
+            content = tpl.format(
+                job_name=job_name,
+                total_time=duration_text(total_time),
+                elapsed_time=duration_text(elapsed_time),
+                remaining_time=duration_text(remaining_time),
             )
             self._path.write_text(textwrap.dedent(content))
 
