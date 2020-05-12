@@ -69,10 +69,11 @@ class StatusWatcher(Extension):
         self._path = Path(
             "~/cura-print-status.txt"
         ).expanduser()  # should be configurable 🤷‍♀️
+        self._path.write_text("\n")
 
         self._timer = QTimer()
         self._timer.timeout.connect(self.dump_status)
-        self._timer.start(1000)
+        self._timer.start(15000)
 
     def dump_status(self):
         try:
@@ -107,6 +108,9 @@ class StatusWatcher(Extension):
                 remaining_time=remaining_time,
             )
             self._path.write_text(textwrap.dedent(content))
+
+            if self._timer.interval() > 1000:
+                self._timer.setInterval(1000)
 
         except Exception as e:
             Logger.log("w", "failed to write status file: {}".format(e))
